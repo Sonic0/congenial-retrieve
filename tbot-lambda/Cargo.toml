@@ -5,3 +5,9 @@ authors = ["Andrea Salvatori - IU6FZL <andrea.salvatori92@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+lambda_runtime = "0.2.1"
+simple_logger = "1.6.0"
+simple-error = "0.2.1"
+log = "0.4.8"
+serde_derive = "1.0.105"
+serde = "1.0.105"
