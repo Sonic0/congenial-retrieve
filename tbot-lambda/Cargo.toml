@@ -5,9 +5,12 @@ authors = ["Andrea Salvatori - IU6FZL <andrea.salvatori92@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-lambda_runtime = "0.2.1"
-simple_logger = "1.6.0"
-simple-error = "0.2.1"
-log = "0.4.8"
-serde_derive = "1.0.105"
-serde = "1.0.105"
+lambda_runtime = "0.2"
+simple_logger = "1.6"
+simple-error = "0.2"
+log = "0.4"
+serde_derive = "1.0"
+serde = "1.0"
+rusoto_dynamodb = "0.43"
+openssl = { version = "0.10", features = ["vendored"] }
+serde_json = "1.0.51"
