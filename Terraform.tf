@@ -32,6 +32,11 @@ variable "account_id" {
   description = "The account id related to the used AWS profile"
 }
 
+variable "telegram_bot_token" {
+  type        = string
+  description = "The Token for the Telegram bot provided by BotFather"
+}
+
 # ---------------------------------------------------------------
 # ------------------- API GATEWAY -------------------------------
 resource "aws_api_gateway_rest_api" "tbot_RLC_api" {
@@ -220,13 +225,14 @@ resource "aws_lambda_function" "tbot_RLC_lambda" {
   #depends_on    = [aws_iam_role_policy_attachment.tbot_RLC_lambda_logs,aws_cloudwatch_log_group.tbot_RLC_lambda_group]
   depends_on    = [aws_iam_role_policy_attachment.tbot_RLC_lambda_logs]
   handler       = "tbot_RLC_lambda.main"
-  runtime       = "provided"
+  runtime       = "provided" # Does not exists a specific runtime for Rust
 
   # The filebase64sha256() function is available in Terraform 0.11.12 and later
   source_code_hash = filebase64sha256("tbot-lambda/lambda.zip")
 
   environment {
     variables = {
+      TELEGRAM_BOT_TOKEN = telegram_bot_token,
       RUST_BACKTRACE = 1
     }
   }
