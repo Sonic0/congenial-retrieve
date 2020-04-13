@@ -48,9 +48,16 @@ resource "aws_api_gateway_rest_api" "tbot_RLC_api" {
 # ------------------------ API STAGES ---------------------------
 # ---- DEV ----
 resource "aws_api_gateway_stage" "dev" {
+  depends_on    = [aws_api_gateway_deployment.dev, aws_api_gateway_resource.resource, aws_cloudwatch_log_group.tbot_RLC_api_group]
   stage_name    = "dev"
   rest_api_id   = aws_api_gateway_rest_api.tbot_RLC_api.id
   deployment_id = aws_api_gateway_deployment.dev.id
+
+  # CloudWatch Stage Log Group
+  access_log_settings {
+    destination_arn = aws_cloudwatch_log_group.tbot_RLC_api_group.arn
+    format = "{ \"requestId\": $context.requestId, \"sourceIP\": $context.identity.sourceIp, \"httpMethod\": $context.httpMethod, \"status\": $context.status, \"body\": $input.json('$')}"
+  }
 }
 
 resource "aws_api_gateway_deployment" "dev" {
@@ -83,9 +90,11 @@ resource "aws_api_gateway_method_settings" "settings" {
   stage_name  = aws_api_gateway_stage.dev.stage_name
   method_path = "${aws_api_gateway_resource.resource.path_part}/${aws_api_gateway_method.default-post.http_method}"
 
+  # CloudWatch Method Log
   settings {
     metrics_enabled         = true
     logging_level           = "INFO"
+    data_trace_enabled      = true
     throttling_rate_limit   = 1
     throttling_burst_limit  = 2
   }
@@ -331,11 +340,6 @@ resource "aws_dynamodb_table" "tbot_RLC_dynamodb" {
   attribute {
     name = "LastRetrieve"
     type = "N"
-  }
-
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
   }
 
   global_secondary_index {
