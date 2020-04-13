@@ -37,6 +37,7 @@ variable "telegram_bot_token" {
   description = "The Token for the Telegram bot provided by BotFather"
 }
 
+
 # ---------------------------------------------------------------
 # ------------------- API GATEWAY -------------------------------
 resource "aws_api_gateway_rest_api" "tbot_RLC_api" {
@@ -221,6 +222,7 @@ resource "aws_lambda_permission" "apigw_lambda" {
 resource "aws_lambda_function" "tbot_RLC_lambda" {
   filename      = "tbot-lambda/lambda.zip"
   function_name = "tbot_RLC_lambda"
+  memory_size   = 128
   role          = aws_iam_role.tbot_RLC_lambda_cloudwatch_role.arn
   #depends_on    = [aws_iam_role_policy_attachment.tbot_RLC_lambda_logs,aws_cloudwatch_log_group.tbot_RLC_lambda_group]
   depends_on    = [aws_iam_role_policy_attachment.tbot_RLC_lambda_logs]
@@ -232,7 +234,8 @@ resource "aws_lambda_function" "tbot_RLC_lambda" {
 
   environment {
     variables = {
-      TELEGRAM_BOT_TOKEN = telegram_bot_token,
+      TELEGRAM_BOT_TOKEN = var.telegram_bot_token,
+      DYNAMO_TABLE_NAME = aws_dynamodb_table.tbot_RLC_dynamodb.name,
       RUST_BACKTRACE = 1
     }
   }
@@ -300,25 +303,83 @@ resource "aws_iam_role_policy_attachment" "tbot_RLC_lambda_logs" {
   policy_arn = aws_iam_policy.tbot_RLC_lambda_cloudwatch_logging.arn
 }
 
-
 # ---------------------------------------------------------------
-# --------------------------- VPC -------------------------------
+# -------------------- DYNAMO DB TABLE --------------------------
+resource "aws_dynamodb_table" "tbot_RLC_dynamodb" {
+  name           = "RLS_user_settings"
+  billing_mode   = "PROVISIONED"
+  read_capacity  = 5
+  write_capacity = 5
+  hash_key       = "UserId"
+  range_key      = "LastRetrieve"
 
-# create VPC
-resource "aws_vpc" "TbotRetriveLastCommitVPC" {
-  cidr_block           = "20.0.0.0/24"
-  instance_tenancy     = "default"
-  enable_dns_hostnames = "true"
+  attribute {
+    name = "UserId"
+    type = "N"
+  }
+
+  attribute {
+    name = "Username"
+    type = "S"
+  }
+
+  attribute {
+    name = "Repos"
+    type = "S"
+  }
+
+  attribute {
+    name = "LastRetrieve"
+    type = "N"
+  }
+
+  ttl {
+    attribute_name = "TimeToExist"
+    enabled        = false
+  }
+
+  global_secondary_index {
+    name               = "RLC_Index"
+    hash_key           = "UserId"
+    range_key          = "Username"
+    write_capacity     = 3
+    read_capacity      = 3
+    projection_type    = "ALL"
+  }
+
+  global_secondary_index {
+    name               = "RLC_Index2"
+    hash_key           = "Username"
+    range_key          = "Repos"
+    write_capacity     = 3
+    read_capacity      = 3
+    projection_type    = "KEYS_ONLY"
+  }
+
   tags = {
-    Name = "TerraformTest-VPC"
+    Name        = "dynamodb-table-1"
+    Environment = "dev"
   }
 }
 
-//create Internet Gateway
-resource "aws_internet_gateway" "TbotRetriveLastCommitIGW" {
-  vpc_id = aws_vpc.TbotRetriveLastCommitVPC.id
-
-  tags = {
-    Name = "TbotRetriveLastCommitIGW"
-  }
-}
+//# ---------------------------------------------------------------
+//# --------------------------- VPC -------------------------------
+//
+//# create VPC
+//resource "aws_vpc" "TbotRetriveLastCommitVPC" {
+//  cidr_block           = "20.0.0.0/24"
+//  instance_tenancy     = "default"
+//  enable_dns_hostnames = "true"
+//  tags = {
+//    Name = "TerraformTest-VPC"
+//  }
+//}
+//
+////create Internet Gateway
+//resource "aws_internet_gateway" "TbotRetriveLastCommitIGW" {
+//  vpc_id = aws_vpc.TbotRetriveLastCommitVPC.id
+//
+//  tags = {
+//    Name = "TbotRetriveLastCommitIGW"
+//  }
+//}
