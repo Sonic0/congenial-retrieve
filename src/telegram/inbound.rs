@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct User {
     pub id: i64,
     pub username: Option<String>,
@@ -8,7 +8,7 @@ pub struct User {
     pub last_name: Option<String>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Chat {
     pub id: i64,
     pub username: Option<String>,
@@ -18,7 +18,7 @@ pub struct Chat {
     pub chat_type: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct Message {
     pub date: i64,
     pub chat: Chat,
@@ -28,7 +28,7 @@ pub struct Message {
     pub entities: Option<Vec<MessageEntity>>,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct MessageEntity {
     // Only relevant fields
     #[serde(rename = "type")]
@@ -38,7 +38,7 @@ pub struct MessageEntity {
     pub user: Option<User>,
 }
 
-#[derive(Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum MessageEntityType {
     Mention,
@@ -56,7 +56,7 @@ pub enum MessageEntityType {
     TextMention,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct InlineQuery {
     pub id: String,
     pub from: User,
@@ -64,7 +64,7 @@ pub struct InlineQuery {
     pub offset: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct TelegramUpdate {
     pub update_id: i64,
     pub message: Option<Message>,

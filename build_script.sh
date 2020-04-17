@@ -15,7 +15,6 @@ SCRIPT_FULLPATH="${SCRIPT_DIR}/${SCRIPT_NAME}"
 # TODO -> check if target already added, otherwise add it. Useful in a ci/cd
 # rustup target add x86_64-unknown-linux-musl
 
-cd tbot-lambda
 cargo build --release --target x86_64-unknown-linux-musl
 cp target/x86_64-unknown-linux-musl/release/congenial-spork bootstrap &&
   zip lambda.zip bootstrap && rm bootstrap | exit 1
