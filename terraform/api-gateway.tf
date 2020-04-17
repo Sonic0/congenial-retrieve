@@ -8,14 +8,17 @@ variable "account_id" {
 }
 
 
-# ---------------------------------------------------------------
-# ------------------- API GATEWAY -------------------------------
+##############################################################
+# API-GATEWAY
+##############################################################
 resource "aws_api_gateway_rest_api" "tbot_RLC_api" {
   name        = "TbotRetriveLastCommit"
   description = "API for Telegram bot retrieve last commit of a project"
 }
 
-# ------------------------ API STAGES ---------------------------
+##############################################################
+# API-GATEWAY STAGE
+##############################################################
 # ---- DEV ----
 resource "aws_api_gateway_stage" "dev" {
   depends_on    = [aws_api_gateway_deployment.dev, aws_api_gateway_resource.resource, aws_cloudwatch_log_group.tbot_RLC_api_group]
@@ -36,7 +39,9 @@ resource "aws_api_gateway_deployment" "dev" {
   stage_name  = "dev"
 }
 
-# ------------------------ API RESOURCES ---------------------------
+##############################################################
+# API GATEWAY RESOURCES
+##############################################################
 # ---- /crittomane ----
 resource "aws_api_gateway_resource" "resource" {
   path_part   = "crittomane"
@@ -44,7 +49,9 @@ resource "aws_api_gateway_resource" "resource" {
   rest_api_id = aws_api_gateway_rest_api.tbot_RLC_api.id
 }
 
-# ------------------------ API METHODS ---------------------------
+##############################################################
+# API-GATEWAY METHODS
+##############################################################
 # ---- POST - /crittomane ----
 resource "aws_api_gateway_method" "default-post" {
   rest_api_id   = aws_api_gateway_rest_api.tbot_RLC_api.id
@@ -95,8 +102,9 @@ resource "aws_api_gateway_method_response" "response_500" {
   status_code = "502"
 }
 
-# ---------------------------------------------------------------
-# ------------------------ API MODELS ---------------------------
+##############################################################
+# API-GATEWAY MODELS
+##############################################################
 resource "aws_api_gateway_request_validator" "tbot_RLC_all" {
   name                        = "all"
   rest_api_id                 = aws_api_gateway_rest_api.tbot_RLC_api.id
@@ -113,73 +121,6 @@ resource "aws_api_gateway_model" "tbot_RLC_default-model" {
   schema = <<EOF
 {
   "type": "string"
-}
-EOF
-}
-
-# ---------------------------------------------------------------
-# ---------------------- CLOUDWATCH API -------------------------
-
-# ---------------------- api account -------------------------
-resource "aws_api_gateway_account" "tbot_RLC_api_account" {
-  cloudwatch_role_arn = aws_iam_role.tbot_RLC_api_cloudwatch_role.arn
-}
-
-# ---------------------------------------------------------------
-# ---------------- CLOUDWATCH API LOG GROUP ---------------------
-# This is to optionally manage the CloudWatch Log Group for the Lambda Function.
-# If skipping this resource configuration, also add "logs:CreateLogGroup" to the IAM policy below.
-resource "aws_cloudwatch_log_group" "tbot_RLC_api_group" {
-  name              = "/aws/api-gateway/${aws_api_gateway_rest_api.tbot_RLC_api.name}"
-  retention_in_days = 14
-}
-
-# ---------------------------------------------------------------
-# ------------------- API-GATEWAY IAM ROLE ----------------------
-resource "aws_iam_role" "tbot_RLC_api_cloudwatch_role" {
-  name = "tbot_RLC_api_cloudwatch_role"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "",
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "apigateway.amazonaws.com"
-      },
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-EOF
-}
-
-# ---------------------------------------------------------------
-# ------------- CLOUDWATCH API IAM POLICY & ATTACH --------------
-resource "aws_iam_role_policy" "tbot_RLC_api_cloudwatch_logging" {
-  name = "tbot_RLC_api_cloudwatch_logging"
-  role = aws_iam_role.tbot_RLC_api_cloudwatch_role.id
-
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Effect": "Allow",
-            "Action": [
-                "logs:CreateLogGroup",
-                "logs:CreateLogStream",
-                "logs:DescribeLogGroups",
-                "logs:DescribeLogStreams",
-                "logs:PutLogEvents",
-                "logs:GetLogEvents",
-                "logs:FilterLogEvents"
-            ],
-            "Resource": "*"
-        }
-    ]
 }
 EOF
 }
