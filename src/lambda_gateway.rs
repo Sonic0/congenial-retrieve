@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use serde::de::{DeserializeOwned, Deserializer, Error};
 use serde::{Deserialize, Serialize};
 use serde_json;
-use serde_json::Value;
 
 /// Represents a deserializer function that deserializes values from a JSON string and
 /// is intended to be used in conjunction with serde's with attribute, e.g.
@@ -18,7 +17,9 @@ use serde_json::Value;
 pub fn deserialize<'a, T: DeserializeOwned, D: Deserializer<'a>>(
     deserializer: D,
 ) -> Result<T, D::Error> {
-    serde_json::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
+    let deserialized_str = &String::deserialize(deserializer)?;
+    println!("DESERIALIZED --> {:#?}", deserialized_str) ;
+    serde_json::from_str(deserialized_str).map_err(Error::custom)
 }
 
 /// This struct represents the incoming lambda request. The body is being passed in by AWS
@@ -27,13 +28,6 @@ pub fn deserialize<'a, T: DeserializeOwned, D: Deserializer<'a>>(
 /// but for the purpose of this demonstration, the body field is sufficient and others are ignored.
 #[derive(Deserialize, Debug)]
 pub struct LambdaRequest<Data: DeserializeOwned> {
-    #[serde(deserialize_with = "deserialize")]
-    headers: HashMap<String, String>,
-    #[serde(deserialize_with = "deserialize")]
-    path_parameters: Vec<Value>,
-    // query_parameters: HashMap<String, String>,
-    #[serde(deserialize_with = "deserialize")]
-    request_context: Vec<Value>,
     #[serde(deserialize_with = "deserialize")]
     body: Data,
 }

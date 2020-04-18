@@ -2,39 +2,38 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct User {
-    pub id: i64,
-    pub username: Option<String>,
-    pub first_name: String,
-    pub last_name: Option<String>,
+    pub id: u64,
+    // pub username: Option<String>,
+    // pub first_name: String,
+    // pub last_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Chat {
-    pub id: i64,
-    pub username: Option<String>,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    #[serde(rename = "type")]
-    pub chat_type: String,
+    pub id: u64,
+    // pub username: Option<String>,
+    // pub first_name: Option<String>,
+    // pub last_name: Option<String>,
+    // #[serde(rename = "type")]
+    // pub chat_type: String,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Message {
-    pub date: i64,
+    pub date: u64,
     pub chat: Chat,
-    pub message_id: i64,
-    pub from: Option<User>,
-    pub text: Option<String>,
-    pub entities: Option<Vec<MessageEntity>>,
+    pub message_id: u64,
+    pub from: User,
+    pub text: String,
+    pub entities: Vec<MessageEntity>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct MessageEntity {
-    // Only relevant fields
     #[serde(rename = "type")]
     pub entity_type: MessageEntityType,
-    pub offset: i32,
-    pub length: i32,
+    pub offset: usize,
+    pub length: usize,
     pub user: Option<User>,
 }
 
@@ -56,17 +55,17 @@ pub enum MessageEntityType {
     TextMention,
 }
 
-#[derive(Debug, Deserialize)]
-pub struct InlineQuery {
-    pub id: String,
-    pub from: User,
-    pub query: String,
-    pub offset: String,
-}
+// #[derive(Debug, Deserialize)]
+// pub struct InlineQuery {
+//     pub id: String,
+//     pub from: User,
+//     pub query: String,
+//     pub offset: String,
+// }
 
 #[derive(Debug, Deserialize)]
 pub struct TelegramUpdate {
     pub update_id: i64,
-    pub message: Option<Message>,
-    pub inline_query: Option<InlineQuery>,
+    pub message: Message,
+    // pub inline_query: Option<InlineQuery>,
 }
