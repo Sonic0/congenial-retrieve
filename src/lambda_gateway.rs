@@ -18,7 +18,6 @@ pub fn deserialize<'a, T: DeserializeOwned, D: Deserializer<'a>>(
     deserializer: D,
 ) -> Result<T, D::Error> {
     let deserialized_str = &String::deserialize(deserializer)?;
-    println!("DESERIALIZED --> {:#?}", deserialized_str) ;
     serde_json::from_str(deserialized_str).map_err(Error::custom)
 }
 
@@ -67,7 +66,7 @@ impl LambdaResponseBuilder {
         LambdaResponseBuilder {
             status_code: 200,
             headers: HashMap::new(),
-            body: "".to_owned(),
+            body: "".to_string(),
         }
     }
 

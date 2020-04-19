@@ -1,9 +1,9 @@
 use crate::telegram::outbound::SendMessage;
-use tokio;
 use anyhow::Result;
 use reqwest;
 use reqwest::Url;
 use std::env;
+use tokio;
 
 const BASE_URL: &str = "https://api.telegram.org/";
 

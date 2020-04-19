@@ -1,37 +1,21 @@
+mod actions;
 mod command;
 mod lambda_gateway;
 mod telegram;
 
-use crate::telegram::{
-    inbound::{Message, MessageEntityType, TelegramUpdate},
-    outbound::{ParseMode, SendMessage},
-};
+use crate::telegram::inbound::{Message, MessageEntityType, TelegramUpdate};
+use actions::send_message;
 use anyhow::Result;
 use command::Command;
+use lambda_gateway::{LambdaRequest, LambdaResponse, LambdaResponseBuilder};
 use lambda_runtime::{error::HandlerError, lambda, Context};
 #[allow(unused_imports)]
 use log::{error, info, trace, warn};
-use serde_derive::Serialize;
-#[allow(unused_imports)]
-use simple_error::bail;
 use simple_logger;
-
-use lambda_gateway::{LambdaRequest, LambdaResponse, LambdaResponseBuilder};
-
-// /// This is the JSON payload we expect to be passed to us by the client accessing our lambda.
-// #[derive(Deserialize, Debug)]
-// struct InputPayload {
-//     name: String,
-// }
-
-/// This is the JSON payload we will return back to the client if the request was successful.
-#[derive(Serialize, Debug)]
-struct OutputPayload {
-    message: String,
-}
 
 impl Message {
     fn handle(&self) {
+        // Get each MessageEntity inside entities key only if the type is a BotCommand
         let bot_commands = self
             .entities
             .iter()
@@ -47,16 +31,6 @@ impl Message {
             send_message(self.chat.id, message_text);
         }
     }
-}
-
-fn send_message(chat_id: u64, text: String) {
-    telegram::api::send_message(&SendMessage {
-        chat_id,
-        parse_mode: Some(ParseMode::Markdown),
-        disable_web_page_preview: Some(true),
-        text,
-    })
-    .expect("Error during send_message, retry");
 }
 
 fn main() -> Result<()> {
@@ -76,8 +50,6 @@ fn lambda_handler(
     // Handle the "message" key value inside the input body
     update.message.handle();
 
-    // bot.run_with(payload);
-
     let response = LambdaResponseBuilder::new().with_status(200).build();
     Ok(response)
 }
@@ -90,10 +62,23 @@ mod tests {
     fn handle_messagge() {
         let input_messagge = Message {
             message_id: 6,
-            from: User { id: 23617834 },
-            chat: Chat { id: 23617834 },
-            date: 1586811719,
-            text: "aa /help bb".to_string(),
+            from: User {
+                id: 12345678,
+                is_bot: false,
+                first_name: "Andrea".to_owned(),
+                last_name: None,
+                username: None,
+                language_code: None,
+            },
+            chat: Chat {
+                id: 12345678,
+                first_name: None,
+                last_name: None,
+                username: None,
+                chat_type: "private".to_owned(),
+            },
+            date: 1586743419,
+            text: "aa /help bb".to_owned(),
             entities: vec![MessageEntity {
                 offset: 3,
                 length: 5,

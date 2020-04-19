@@ -7,7 +7,6 @@ edition = "2018"
 [dependencies]
 lambda_runtime = "0.2"
 simple_logger = "1.6"
-simple-error = "0.2"
 log = "0.4"
 serde_derive = "1.0"
 serde = "1.0"

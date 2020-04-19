@@ -3,19 +3,22 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct User {
     pub id: u64,
-    // pub username: Option<String>,
-    // pub first_name: String,
-    // pub last_name: Option<String>,
+    pub is_bot: bool,
+    pub first_name: String,
+    pub last_name: Option<String>,
+    pub username: Option<String>,
+    pub language_code: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Chat {
     pub id: u64,
-    // pub username: Option<String>,
-    // pub first_name: Option<String>,
-    // pub last_name: Option<String>,
-    // #[serde(rename = "type")]
-    // pub chat_type: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub username: Option<String>,
+    // Rename is necessary because of type is an built-in Rust param
+    #[serde(rename = "type")]
+    pub chat_type: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -55,17 +58,17 @@ pub enum MessageEntityType {
     TextMention,
 }
 
-// #[derive(Debug, Deserialize)]
-// pub struct InlineQuery {
-//     pub id: String,
-//     pub from: User,
-//     pub query: String,
-//     pub offset: String,
-// }
+#[derive(Debug, Deserialize)]
+pub struct InlineQuery {
+    pub id: String,
+    pub from: User,
+    pub query: String,
+    pub offset: String,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct TelegramUpdate {
     pub update_id: i64,
     pub message: Message,
-    // pub inline_query: Option<InlineQuery>,
+    pub inline_query: Option<InlineQuery>,
 }
