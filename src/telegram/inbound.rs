@@ -28,7 +28,7 @@ pub struct Message {
     pub message_id: u64,
     pub from: User,
     pub text: String,
-    pub entities: Vec<MessageEntity>,
+    pub entities: Option<Vec<MessageEntity>>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -68,7 +68,7 @@ pub struct InlineQuery {
 
 #[derive(Debug, Deserialize)]
 pub struct TelegramUpdate {
-    pub update_id: i64,
+    pub update_id: u64,
     pub message: Message,
     pub inline_query: Option<InlineQuery>,
 }
