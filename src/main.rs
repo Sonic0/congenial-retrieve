@@ -25,24 +25,27 @@ fn lambda_handler(
     let update = event.body();
     info!("{:#?}", update);
 
-    if !update.message.plain_text().is_empty() {
+    if update.message.plain_text().is_some() {
         send_message(update.message.chat.id, update.message.text.to_owned());
     }
 
-    let commands = update.message.commands();
-    if commands.is_none() {
-        warn!("No commands to handle");
-        send_message(update.message.chat.id, "No commands to handle, I sent your message as reply! \u{1F980}".to_owned());
-    } else {
-        for cmd in commands.unwrap() {
-            let command = GlobalCommand::new(&cmd);
+    if !update.message.commands().is_empty() {
+        let commands = update.message.commands();
+        for cmd in commands {
+            let command = GlobalCommand::new(cmd);
             let message_text = match command {
                 Ok(cmd_text) => cmd_text,
                 Err(err) => err.to_string(),
             };
-            dbg!(&message_text);
+            trace!("Message to send back -> {}", message_text);
             send_message(update.message.chat.id, message_text);
         }
+    } else {
+        warn!("No commands to handle");
+        send_message(
+            update.message.chat.id,
+            "No commands to handle, I sent back your message as reply! \u{1F980}".to_owned(),
+        );
     }
 
     let response = LambdaResponseBuilder::new().with_status(200).build();
@@ -76,8 +79,8 @@ mod tests {
             text: "Plain text".to_owned(),
             entities: None,
         };
-        assert_eq!(input_messagge.plain_text().is_empty(), false);
-        assert_eq!(input_messagge.plain_text(), "Plain text".to_owned())
+        assert_eq!(input_messagge.plain_text().is_none(), false);
+        assert_eq!(input_messagge.plain_text(), Some("Plain text".to_owned()))
     }
 
     #[test]
