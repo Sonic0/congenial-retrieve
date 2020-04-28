@@ -2,7 +2,7 @@ mod lambda_gateway;
 mod telegram;
 
 use crate::telegram::action::send_message;
-use crate::telegram::command::GlobalCommand;
+use crate::telegram::command::CommandAction;
 use crate::telegram::inbound::TelegramUpdate;
 use anyhow::Result;
 use lambda_gateway::{LambdaRequest, LambdaResponse, LambdaResponseBuilder};
@@ -22,38 +22,56 @@ fn lambda_handler(
     event: LambdaRequest<TelegramUpdate>,
     _context: Context,
 ) -> Result<LambdaResponse, HandlerError> {
+    let mut lambda_res_code = 200;
     let update = event.body();
     info!("{:#?}", update);
 
     if update.message.plain_text().is_some() {
-        send_message(update.message.chat.id, update.message.text.to_owned());
+        let res = send_message(update.message.chat.id, update.message.text.clone());
+        if res.is_err() {
+            lambda_res_code = 500;
+        }
     }
 
-    if !update.message.commands().is_empty() {
-        let commands = update.message.commands();
+    if !update.message.get_commands().is_empty() {
+        let commands = update.message.get_commands();
         for cmd in commands {
-            let command = GlobalCommand::new(cmd);
-            let message_text = match command {
-                Ok(cmd_text) => cmd_text,
-                Err(err) => err.to_string(),
+            let res = if cmd.is_global {
+                cmd.with_user(update.message.chat.clone()).exec()
+            } else {
+                cmd.with_user(update.message.chat.clone())
+                    .with_action(CommandAction::SendMessage(
+                        "Command not implemented".to_owned(),
+                    ))
+                    .with_description("The command you had specified does not exist")
+                    .exec()
             };
-            trace!("Message to send back -> {}", message_text);
-            send_message(update.message.chat.id, message_text);
+
+            match res {
+                Ok(_) => info!("Bot has sended response"),
+                Err(_) => lambda_res_code = 500,
+            }
         }
     } else {
         warn!("No commands to handle");
-        send_message(
+        let res = send_message(
             update.message.chat.id,
             "No commands to handle, I sent back your message as reply! \u{1F980}".to_owned(),
         );
+        if res.is_err() {
+            lambda_res_code = 500;
+        }
     }
 
-    let response = LambdaResponseBuilder::new().with_status(200).build();
+    let response = LambdaResponseBuilder::new()
+        .with_status(lambda_res_code)
+        .build();
     Ok(response)
 }
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::telegram::inbound::{Chat, Message, MessageEntity, MessageEntityType, User};
 
     #[test]
@@ -111,6 +129,18 @@ mod tests {
                 user: None,
             }]),
         };
-        assert_eq!(input_messagge.commands().is_none(), false);
+        assert_eq!(input_messagge.get_commands().is_empty(), false);
+    }
+
+    #[test]
+    fn command_object_parameters() {
+        let bot_cmd = Command::new()
+            .with_action(CommandAction::SendMessage("a miao miao".to_owned()))
+            .with_command("/miao")
+            .with_description("This is the cat noise")
+            .is_global();
+        assert_eq!(bot_cmd.command, "/miao");
+        assert_eq!(bot_cmd.description, "This is the cat noise");
+        assert_eq!(bot_cmd.is_global, false);
     }
 }

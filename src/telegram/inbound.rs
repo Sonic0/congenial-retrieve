@@ -10,7 +10,7 @@ pub struct User {
     pub language_code: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Chat {
     pub id: u64,
     pub first_name: Option<String>,

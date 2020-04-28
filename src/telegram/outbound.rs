@@ -10,9 +10,10 @@ pub struct SendMessage {
 }
 
 #[derive(Serialize)]
+#[allow(dead_code)]
 pub enum ParseMode {
     Markdown,
-    //HTML,
+    HTML,
 }
 
 #[derive(Serialize)]
