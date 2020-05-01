@@ -70,7 +70,7 @@ impl Command {
         }
 
         match self.action {
-            CommandAction::SendMessage(s) => send_message(self.user.id, s)?,
+            CommandAction::SendMessage(s) => send_message(self.user.id, s, None)?,
         };
 
         Ok(())
@@ -110,15 +110,31 @@ impl GlobalCommand {
     }
 
     fn start_res() -> String {
-        "Welcome to Github bot!
-
-        *Usage*
-        [Github here](https://github.com)."
-            .to_string()
+        "   *Usage*
+Crittome ti permette di restare aggiornato sugli ultimi commit che vengono effettuati nei tuoi repository GitHub preferiti.
+La prima cosa da fare  è inviare il comando /token per associare il tuo token GitHub.
+Successivamente invia il comando /addrepo seguito dalla ulr del repository che vuoi aggiungere ai tuoi preferiti.
+Il bot salverà l'hash dell'ultimo commit relativo al repository aggiunto in modo da tenerlo come riferimento.
+In ultimo lancia /getupdate per verificare la presenza di aggiornamenti nei repositories.
+        
+    *Questions, Improvements, Changes*
+Crittomane is open source and lives on [Github here](https://github.com/Sonic0/congenial-retrieve).
+If you have a great idea, feature request, or bug report, feel free to [open an issue here](https://github.com/Sonic0/congenial-retrieve/issues)
+        
+    *Legal stuff*
+- The code for this bot is licensed under the [GPL-3.0](https://github.com/Sonic0/congenial-retrieve/blob/master/LICENSE)".to_string()
     }
 
     fn help_res() -> String {
-        "This is the HELP".to_string()
+        "   *Help*
+- /start
+- /help
+- /settings
+- /token
+- /addrepo
+- /getupdate
+- /rmrepo"
+            .to_string()
     }
 
     fn settings_res() -> String {

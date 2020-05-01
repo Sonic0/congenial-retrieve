@@ -27,7 +27,11 @@ fn lambda_handler(
     info!("{:#?}", update);
 
     if update.message.plain_text().is_some() {
-        let res = send_message(update.message.chat.id, update.message.text.clone());
+        let res = send_message(
+            update.message.chat.id,
+            update.message.text.clone(),
+            Some(update.message.message_id),
+        );
         if res.is_err() {
             lambda_res_code = 500;
         }
@@ -57,6 +61,7 @@ fn lambda_handler(
         let res = send_message(
             update.message.chat.id,
             "No commands to handle, I sent back your message as reply! \u{1F980}".to_owned(),
+            None,
         );
         if res.is_err() {
             lambda_res_code = 500;

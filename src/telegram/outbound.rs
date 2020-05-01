@@ -7,12 +7,14 @@ pub struct SendMessage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parse_mode: Option<ParseMode>,
     pub disable_web_page_preview: Option<bool>,
+    pub reply_to_message_id: Option<u64>,
 }
 
 #[derive(Serialize)]
 #[allow(dead_code)]
 pub enum ParseMode {
     Markdown,
+    MarkdownV2,
     HTML,
 }
 
