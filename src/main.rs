@@ -78,6 +78,7 @@ fn lambda_handler(
 mod tests {
     use super::*;
     use crate::telegram::inbound::{Chat, Message, MessageEntity, MessageEntityType, User};
+    use crate::telegram::command::Command;
 
     #[test]
     fn is_plain_text() {
@@ -143,7 +144,7 @@ mod tests {
             .with_action(CommandAction::SendMessage("a miao miao".to_owned()))
             .with_command("/miao")
             .with_description("This is the cat noise")
-            .is_global();
+            .check_global();
         assert_eq!(bot_cmd.command, "/miao");
         assert_eq!(bot_cmd.description, "This is the cat noise");
         assert_eq!(bot_cmd.is_global, false);
