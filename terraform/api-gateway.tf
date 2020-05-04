@@ -1,13 +1,3 @@
-############################
-# INPUT VARIABLES
-############################
-# Input variable from the Command Line or as Environment variable(export TF_VAR_account_id=xxxxxxxxx)
-variable "account_id" {
-  type        = string
-  description = "The account id related to the used AWS profile"
-}
-
-
 ##############################################################
 # API-GATEWAY
 ##############################################################
